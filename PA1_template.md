@@ -9,13 +9,14 @@ output:
 ## Loading and preprocessing the data
 The below code is used to load the data from the data set file.
 
-```{r loading data}
+
+```r
 rawDF <- read.csv("activity.csv", stringsAsFactors = FALSE)
 # the below variable stores the count of places where steps is NA
 sumofNA <- sum(is.na(rawDF$steps))
 ```
 
-So, after loading the data we can see that there are `r sumofNA`
+So, after loading the data we can see that there are 2304
 observations where there are no number of steps mentioned. We will look
 at filling the missing values as part of a later section below
 
@@ -26,24 +27,31 @@ The total number of steps taken per day would be computed by the
 following and accordingly a histogram is plotted.Alongside, also calculate
 the mean and the median per day.
 
-```{r mean per day}
+
+```r
 sumperday <- aggregate(steps~date, rawDF, sum, na.rm = TRUE)
 # plot the histogram
 barplot(sumperday$steps, names.arg = sumperday$date)
+```
+
+![](PA1_template_files/figure-html/mean per day-1.png)<!-- -->
+
+```r
 # get the mean and the median of the sum of steps per day
 meanperday <- as.character(mean(sumperday$steps))
 medianperday <- as.character(median(sumperday$steps))
 ```
 
-The mean and median of the total of steps per day is `r meanperday` and 
-`r medianperday` respectively. 
+The mean and median of the total of steps per day is 10766.1886792453 and 
+10765 respectively. 
 
 ## What is the average daily activity pattern?
 
 First lets calculate the aggregate of number of steps taken in each interval
 spanned across all the days.
 
-```{r average steps per interval}
+
+```r
 avgperinterval <- aggregate(steps~interval, rawDF, mean, na.rm = TRUE)
 #contruct the plot
 library(ggplot2)
@@ -54,15 +62,18 @@ g <- ggplot(avgperinterval, aes(interval, steps)) + geom_line(color="blue") + ge
 g
 ```
 
+![](PA1_template_files/figure-html/average steps per interval-1.png)<!-- -->
+
 As seen from the graph the max number of steps per day on an average is
-`r max(avgperinterval$steps)` and are taken in `r avgperinterval[which.max(avgperinterval$steps),]$interval` interval
+206.1698113 and are taken in 835 interval
 
 
 ## Imputing missing values
-As we had seen earlier on, there are `r sumofNA` missing values in the
+As we had seen earlier on, there are 2304 missing values in the
 'steps' column of the data set. This was computed using the below,
 
-```{r missing values}
+
+```r
 # the below variable stores the count of places where steps is NA
 sumofNA <- sum(is.na(rawDF$steps))
 ```
@@ -77,7 +88,8 @@ of steps taken in the day, as there is no information present for that day
 to compute the average.
 
 
-```{r fill missing values}
+
+```r
 ## lets create the data frame with NA values
 dfNA <- subset(rawDF, is.na(rawDF$steps))
 
@@ -97,15 +109,19 @@ mergeDF <- rbind(dfNA, NNAdata)
 newsumperday <- aggregate(steps~date, mergeDF, sum, na.rm = TRUE)
 # plot the histogram
 barplot(newsumperday$steps, names.arg = newsumperday$date)
+```
+
+![](PA1_template_files/figure-html/fill missing values-1.png)<!-- -->
+
+```r
 # get the mean and the median of the sum of steps per day
 newmeanperday <- as.character(mean(newsumperday$steps))
 newmedianperday <- as.character(median(newsumperday$steps))
-
 ```
 
-The mean and median of the total of steps per day is `r newmeanperday` and 
-`r newmedianperday` respectively. 
-If you scroll up then you will see the old value of mean and median were `r meanperday` and `r medianperday` respectively.
+The mean and median of the total of steps per day is 10766.1886792453 and 
+10766.1886792453 respectively. 
+If you scroll up then you will see the old value of mean and median were 10766.1886792453 and 10765 respectively.
 
 Hence we can conclude that by filling the NA value of steps with the mean value of steps for that interval, the mean and median become equal to one another.
 
@@ -115,12 +131,33 @@ Let us create a new data frame with two columns,
 - workday: which defines the day of the week
 - daytype: which defines whether a given day is weekday or weekend
 
-```{r weekday weekend dataframe}
+
+```r
 # lets convert the date column in mergeDF above as a date type
 mergeDF$date <- as.Date(mergeDF$date, format = "%Y-%m-%d") 
 
 # add the workday column
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 mergeDFWD <- mutate(mergeDF, workday=weekdays(mergeDF$date))
 
 # add the daytype column 
@@ -146,5 +183,6 @@ plot(avgperintervalweekday$interval, avgperintervalweekday$steps, type="l", col=
 
 # plot the weekend graph
 plot(avgperintervalweekend$interval, avgperintervalweekend$steps, type="l", col="blue", xlab="Interval", ylab="Weekend Steps Average",  ylim=c(1,250))
-
 ```
+
+![](PA1_template_files/figure-html/weekday weekend dataframe-1.png)<!-- -->
